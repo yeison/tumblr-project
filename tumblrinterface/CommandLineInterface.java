@@ -1,11 +1,15 @@
 /**@author Yeison Rodriguez**/
 package tumblrinterface;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Iterator;
 
 import org.apache.commons.cli.*;
 
+import tumblib.Post;
 import tumblstats.PostStatistics;
 
 public class CommandLineInterface {
@@ -33,9 +37,9 @@ public class CommandLineInterface {
 		options.addOption("tag", "tagged", true, "Return posts with this tag in reverse-chronological order " +
 		"(newest first). Optionally specify chrono=1 to sort in chronological order (oldest first).");
 		options.addOption("s", "search", true, "Search for posts with this query.");
-		options.addOption("u", "url", true, "The url of a tumblr blog.  Useful if the blog is not a " +
-				"tumblr subdomain.");
-		
+		options.addOption("u", "url", true, "The url of a tumblr blog. Useful if the blog is not a tumblr " +
+				"subdomain.");
+
 
 		CommandLine cl = null;
 		try {
@@ -47,13 +51,13 @@ public class CommandLineInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		if(args.length == 0){
 			printHelp(cl, options);
 			System.exit(0);
 		}
 
-		String tumblrJson = "";
+		ArrayList<Post> postList = new ArrayList<Post>();
 		try{
 			if(cl.hasOption("h") || cl.hasOption("help")){
 				printHelp(cl, options);
@@ -63,34 +67,48 @@ public class CommandLineInterface {
 				//The cl.iterator returns an iterator over possible options.
 				Iterator<Option> optionIterator = cl.iterator();
 				LinkedList<String> optionValues = new LinkedList<String>();
+				URL url = null;
 				//Transfer the option arguments to the linked list.
+				if(cl.hasOption("u") || cl.hasOption("url")){
+					try {
+						url = new URL(cl.getOptionValue("url"));
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+				}
 				while(optionIterator.hasNext()){
 					Option option = optionIterator.next();
 					String argument = option.getValue();
 					String optString = option.getLongOpt();
-					if(argument != null){
+					if(argument != null && optString != "url"){
 						//Linked list will consist of options and arguments.
 						optionValues.add(optString);
 						optionValues.add(argument);
 					}
 				}
 				TumblrQuery tQuery;
-				try{
-					String subdomain = cl.getArgs()[0];
-					tQuery = new TumblrQuery(subdomain, optionValues);
-				}catch(ArrayIndexOutOfBoundsException e){
-					tQuery = new TumblrQuery(optionValues);
+				String[] subdomains = {};
+				if(url == null)
+					subdomains = cl.getArgs();
+				for(int i = 0; i < subdomains.length; i++){
+					tQuery = new TumblrQuery(subdomains[i], optionValues);
+					//Get the json that corresponds to this query.
+					postList = tQuery.joinPosts(postList);
 				}
-				//Get the json that corresponds to this query.
-				tumblrJson = tQuery.getJson();
+				if(subdomains.length == 0){
+					if(url != null)
+						postList = new TumblrQuery(url, optionValues).getPosts();
+					else
+						postList = new TumblrQuery(optionValues).getPosts();
+				}
 			}
 		}catch(NullPointerException e){
 			printHelp(cl, options);
 			System.exit(1);
 		}
-		
-		new PostStatistics(tumblrJson);
-		
+
+		new PostStatistics(postList);
+
 	}
 
 	static void printHelp(CommandLine cl, Options options){
