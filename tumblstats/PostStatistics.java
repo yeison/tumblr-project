@@ -12,11 +12,11 @@ public class PostStatistics {
 		Post[] postArray = {};
 		postArray = postList.toArray(postArray);
 
-		new TimeStats("hour", "hour", postArray).createTable(false);
-		System.out.println();
 		new TagStats("tags", "tag", postArray).createTable(false);
 		System.out.println();
 		new TypeStats("types", "type", postArray).createTable(false);
+		System.out.println();
+		new TimeStats("hour", "hour", postArray).createTable(false);
 		System.out.println();
 	}
 
