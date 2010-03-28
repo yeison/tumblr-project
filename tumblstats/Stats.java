@@ -51,6 +51,7 @@ public abstract class Stats {
 		//setData has different implementations depending on the data type.
 		setData();
 		printData();
+			
 	}
 
 	protected abstract void setData();
@@ -60,10 +61,10 @@ public abstract class Stats {
 
 			ResultSet rs = stat.executeQuery("select * from " + tableName + " " +
 					"order by " + keyName + ";");
-			System.out.printf("\t%.11s     %s\n", keyName, "\t\tposts");
+			System.out.printf("\t%-14.16s     %s\n", keyName, "\tposts");
 			while(rs.next())
-				System.out.printf("\t%-4.10s     %s\n", rs.getString(keyName), 
-						"\t\t" + rs.getString("posts"));
+				System.out.printf("\t%-14.16s     %s\n", rs.getString(keyName), 
+						"\t" + rs.getString("posts"));
 
 			rs.close();
 			conn.close();

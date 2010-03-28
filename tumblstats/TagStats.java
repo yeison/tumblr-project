@@ -6,8 +6,10 @@ import java.util.HashMap;
 import tumblib.Post;
 
 public class TagStats extends Stats{
+	
 	TagStats(String tableName, String keyName, Post[] postArray){
 		super(tableName, keyName, postArray);
+		
 	}
 
 	@Override
@@ -22,10 +24,10 @@ public class TagStats extends Stats{
 							tagMap.put(tags[j], tagMap.get(tags[j]) + 1);
 						else
 							tagMap.put(tags[j], 1);
-
+						
 						prep.setString(1, tags[j]);
 						prep.setInt(2, tagMap.get(tags[j]));
-						prep.addBatch();
+						prep.addBatch();			
 
 					}
 			}
