@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.cli.*;
 
@@ -32,7 +33,7 @@ public class CommandLineInterface {
 		/* The second parameter is a boolean that specifies whether the option 
 		 * requires an argument or not.*/
 		options.addOption("h", "help", false, "Print help for this application");
-		options.addOption("s", "start", true, "The post offset to start from. " +
+		options.addOption("st", "start", true, "The post offset to start from. " +
 				"The default is 0.");
 		options.addOption("n", "num", true, "The number of posts to return. " +
 				"The default is 20, and the maximum is 50.");
@@ -52,7 +53,9 @@ public class CommandLineInterface {
 				"specify chrono=1 to sort in chronological order (oldest first).");
 		options.addOption("s", "search", true, "Search for posts with this query.");
 		options.addOption("u", "url", true, "The url of a tumblr blog. Useful " +
-				"if the blog is not a tumblr subdomain.");
+				"if the blog is not a tumblr subdomain.  Cannot be used in " +
+				"conjunction with subdomains.  Num must be less than or equal " +
+				"to 50");
 
 
 		//Create a commandline object.  We can parse input from this object.
@@ -93,33 +96,43 @@ public class CommandLineInterface {
 						e.printStackTrace();
 					}
 				}
+				//start is the post number to begin with, 0 being the newest.
+				int start = 0;
+				if(cl.hasOption("st") || cl.hasOption("start"))
+					start = new Integer(cl.getOptionValue("start"));
+				//num is the number of posts to retrieve from tumblr.
+				int num = 0;
+				if(cl.hasOption ("n") || cl.hasOption("num"))
+					num = new Integer(cl.getOptionValue("num"));
 				while(optionIterator.hasNext()){
 					Option option = optionIterator.next();
 					String argument = option.getValue();
 					String optString = option.getLongOpt();
-					if(argument != null && optString != "url"){
+					if(argument != null && optString != "url" && 
+							num <=50 && optString != "start"){
 						//Linked list will alternate between option and arg.
 						optionValues.add(optString);
 						optionValues.add(argument);
 					}
 				}
-				TumblrQuery tQuery;
+				
+
 				String[] subdomains = {};
 				if(url == null)
 					subdomains = cl.getArgs();
 				for(int i = 0; i < subdomains.length; i++){
-					tQuery = new TumblrQuery(subdomains[i], optionValues);
-					//Get the json that corresponds to this query.
-					postList = tQuery.joinPosts(postList);
+					postList.addAll(queryRange(start, num, optionValues, subdomains[i]));
 				}
 				if(subdomains.length == 0){
 					if(url != null)
 						postList = new TumblrQuery(url, optionValues).getPosts();
 					else
-						postList = new TumblrQuery(optionValues).getPosts();
+						postList.addAll(queryRange(start, num, optionValues, "newsweek"));
 				}
+				
 			}
 		}catch(NullPointerException e){
+			e.printStackTrace();
 			printHelp(cl, options);
 			System.exit(1);
 		}
@@ -135,6 +148,43 @@ public class CommandLineInterface {
 				"\nThe subdomains may be that of any existing tumblr blog " +
 				"located at http://<sub-domain>.tumblr.com.  If none are " +
 				"provided, newsweek is used by default.", options);
+	}
+	
+	static ArrayList<Post> queryRange(int start, int num, LinkedList<String>optionValues, String subdomain){
+		TumblrQuery tQuery;
+		ArrayList<Post> postList = new ArrayList<Post>(); 
+		LinkedList<String> tempOptionValues = new LinkedList<String>();
+		//Tumblr only allows a query on 50 posts at a time.  Lets change
+		//that.
+		for(int i = 0 ; i < num/50; i++){
+			tempOptionValues.add("num");
+			tempOptionValues.add("50");
+			//Shift the start of the range to be queried by 50.
+			int rangeStart = i*50 + start;
+			tempOptionValues.add("start");
+			tempOptionValues.add(new Integer(rangeStart).toString());
+			tempOptionValues.addAll(optionValues);
+			tQuery = new TumblrQuery(subdomain, tempOptionValues);
+			//Join the new range with the previous range.
+			postList = tQuery.joinPosts(postList);
+			//Remove the last rangeStart used.
+			
+		}
+		if(num > 50){
+			int remainder = num%50;
+			int quotient = num/50;
+			tempOptionValues.add("num");
+			tempOptionValues.add(new Integer(remainder).toString());
+			tempOptionValues.add("start");
+			tempOptionValues.add(new Integer(quotient*50).toString());
+			tempOptionValues.addAll(optionValues);
+			postList = 
+				new TumblrQuery(subdomain, tempOptionValues).joinPosts(postList);
+		}
+		else
+			return new TumblrQuery(subdomain, tempOptionValues).getPosts();
+		
+		return postList;
 	}
 
 }	

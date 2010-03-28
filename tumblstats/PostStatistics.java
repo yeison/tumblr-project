@@ -23,8 +23,9 @@ public class PostStatistics {
 		new TimeStats("hour", "hour", postArray).createTable(false);
 		System.out.println();
 		new TagStats("tags", "tag", postArray).createTable(false);
-		System.out.println();
-		System.out.println(postArray[0].getContent());
+		System.out.println("\n");
+		System.out.println("\n");
+		System.out.println(Post.totalCount);
 	}
 
 }
