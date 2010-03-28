@@ -4,6 +4,12 @@ import java.util.ArrayList;
 
 import tumblib.Post;
 
+/**
+ * That Post Statistics class calls the functions that accumulate and print 
+ * statistics about posts.  It passes the postList to those functions.
+ * @author Yeison Rodriguez
+ *
+ */
 
 public class PostStatistics {
 
