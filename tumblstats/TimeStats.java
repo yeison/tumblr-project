@@ -14,7 +14,7 @@ import tumblib.Post;
  */
 public class TimeStats extends Stats{
 	
-	TimeStats(Post[] postArray){
+	public TimeStats(Post[] postArray){
 		super(postArray);
 	}
 	

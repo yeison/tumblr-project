@@ -17,13 +17,13 @@ import tumblib.Post;
  */
 public abstract class Stats {
 
-	String tableName; 
-	String keyName;
-	Post[] postArray;
-	Statement stat = null;
-	Connection conn = null;
-	PreparedStatement prep = null;
-	boolean accumulate = false;
+	protected String tableName; 
+	protected String keyName;
+	protected Post[] postArray;
+	protected Statement stat = null;
+	protected Connection conn = null;
+	protected PreparedStatement prep = null;
+	protected boolean accumulate = false;
 
 	/**
 	 * Creates a Stats object that generates stats on the posts in postArray. 

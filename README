@@ -66,6 +66,8 @@ KNOWN BUGS
    post-types is encountered.
   *If the parser encounters a post-type that is not defined or
    included in the PostType Enum, the program may crash.
+  *If the user queries for a post-type that does not exist, posts of
+   type regular are returned instead.
   *For PhotoPosts containing more than one photo, only the primary 
    photo-url is handled correctly.
   *If one of the dimensions of a photo resolution is greater than

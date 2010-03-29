@@ -1,4 +1,3 @@
-/**@author Yeison Rodriguez**/
 package tumblrinterface;
 
 import java.net.MalformedURLException;
@@ -23,8 +22,8 @@ import tumblstats.PostStatistics;
  * @author Yeison Rodriguez
  */
 public class CommandLineInterface {
-
-
+//This class is long and ugly due to many of the conditions that must be
+//accounted for based on user input.
 	public static void main(String[] args){
 		Options options = new Options();
 		BasicParser parser = new BasicParser();
@@ -56,6 +55,10 @@ public class CommandLineInterface {
 				"if the blog is not a tumblr subdomain.  Cannot be used in " +
 				"conjunction with subdomains.  If num is used, it must be less " +
 				"than or equal to 50, and cannot be \"all\"");
+		options.addOption("c", "content", false, "If given, the content of all" +
+				" posts retrieved will be displayed.");
+		options.addOption("stats", false, "If given, tag and hour statistics " +
+				"will be displayed as well.");
 
 
 		//Create a commandline object.  We can parse input from this object.
@@ -150,8 +153,14 @@ public class CommandLineInterface {
 			printHelp(cl, options);
 			System.exit(1);
 		}
-
-		new PostStatistics(postList);
+		
+		//Create a PostStatistics class to print summaries.
+		PostStatistics stats = new PostStatistics(postList);
+		if(cl.hasOption("c") || cl.hasOption("content"))
+			stats.setAllPosts(true);
+		if(cl.hasOption("stats"))
+			stats.setAllStats(true);
+		stats.printSummary();
 
 	}
 

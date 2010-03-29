@@ -12,18 +12,67 @@ import tumblib.Post;
  */
 
 public class PostStatistics {
-
+	boolean allStats = false;
+	boolean allPosts = false;
+	Post[] postArray = {};
 
 	public PostStatistics(ArrayList<Post> postList){
-		Post[] postArray = {};
 		postArray = postList.toArray(postArray);
-
+		
+	}
+	
+	/**
+	 * Prints the content of one post, and different summary statistics.
+	 */
+	public void printSummary(){
 		System.out.println("Total posts retrieved: " + Post.totalCount);
 		System.out.println("Printing stats...");
 		new TypeStats(postArray).createTable("types", "type");
 		System.out.println();
+		if(allStats)
+			showAllStats();
+		System.out.print("Post id: " + postArray[0].getId());
+		System.out.println(postArray[0].getContent() + "\n");
+		if(allPosts)
+			showAllPosts();
+	}
+	
+	/**
+	 * Collects and prints tag stats and time stats.
+	 * @param postArray The array of posts that will be analyzed.
+	 */
+	public void showAllStats(){
 		new TimeStats(postArray).createTable("hour", "hour");
 		System.out.println();
+		new TagStats(postArray).createTable("tags", "tags");
+		System.out.println();
+	}
+	
+	/**
+	 * Prints the post id and the contents of every post in postArray.
+	 * @param postArray The array of posts to print the contents of.
+	 */
+	public void showAllPosts(){
+		for(int i = 1; i < postArray.length; i++){
+			System.out.print("Post id: " + postArray[i].getId());
+			System.out.println(postArray[i].getContent() + "\n");
+		}
+	}
+	
+	/**
+	 * Sets whether or not all stats should be printed.
+	 * @param bool true or false
+	 */
+	public void setAllStats(boolean bool){
+		allStats = bool;
+	}
+	
+	/**
+	 * Sets whether or not all posts should be printed.
+	 * @param bool true or false
+	 */
+	public void setAllPosts(boolean bool){
+		allPosts = bool;
 	}
 
 }
