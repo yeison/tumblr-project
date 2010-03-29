@@ -21,7 +21,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 /**
- * The TumblrQuery class allows one to construct a Java Object based on a particular
+ * The TumblrQuery class allows one to construct an object that contains the result of a particular
  * query to the tumblr API's JSON end-point.  This query is defined as a URL, 
  * and consists of the location of a tumblr blog, and one or more optional GET 
  * parameters listed at {@link http://www.tumblr.com/docs/en/api}.  The 
