@@ -16,9 +16,13 @@ public class PostStatistics {
 	boolean allPosts = false;
 	Post[] postArray = {};
 
+	/**
+	 * Creates an instance of PostStatistics, which may be used to print
+	 * statistical data about posts.
+	 * @param postList An ArrayList containg objects of type Post.
+	 */
 	public PostStatistics(ArrayList<Post> postList){
-		postArray = postList.toArray(postArray);
-		
+		postArray = postList.toArray(postArray);		
 	}
 	
 	/**
