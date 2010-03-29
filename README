@@ -45,11 +45,13 @@ FEATURES
   tumblr.com.
  *Retrieve any number of posts from a blog, as long as they exist.  
   Specify "all" to retrieve all of that blog's posts.
- *Provides three types of summary statistics:
+ *Three summary statistics are available:
  	-Number of posts made during each hour of the day.
  	-Number of posts for each post-type.
  	-Number of posts for each tag that occurs.
-   
+ *Display total number of posts retrieved.
+ *Print post content from one post or from all of those queried.
+ 
 ==========
 KNOWN BUGS
 ==========
@@ -59,13 +61,16 @@ KNOWN BUGS
   *Tumblr may deny further requests for a period if too many
    requests are made.  An http 500 or 503 error is returned
    by the program when this occurs.
-  *There is an "anwer" post-type that is not handled by the
+  *There is an "answer" post-type that is not handled by the
    program.  A generic Post class is created when one of these
    post-types is encountered.
+  *If the parser encounters a post-type that is not defined or
+   included in the PostType Enum, the program may crash.
   *For PhotoPosts containing more than one photo, only the primary 
    photo-url is handled correctly.
   *If one of the dimensions of a photo resolution is greater than
    1280, that larger photo size is discarded.  Instead, the
    TumblrPhoto class will only store the link to the smaller version
    of the photo (dimensions less than or equal to 1280).
-  *
+  *Cases where there is not internet connection is not handled by the
+   program.

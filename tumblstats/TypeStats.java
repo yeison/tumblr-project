@@ -5,14 +5,22 @@ import java.util.HashMap;
 
 import tumblib.Post;
 
+/**
+ * This class accumulates the number of posts of each particular type in the
+ * postArray given.
+ * @author Yeison Rodriguez
+ *
+ */
 public class TypeStats extends Stats {
-	TypeStats(String tableName, String keyName, Post[] postArray){
-		super(tableName, keyName, postArray);
+	TypeStats(Post[] postArray){
+		super(postArray);
 	}
 
 	@Override
 	protected void setData() {
 		try{
+			//The hashmap uses the type as the key, and the frequency of
+			//that type as the value.
 			HashMap<String, Integer> typeMap = new HashMap<String, Integer>();
 			for(int i = 0; i < postArray.length; i++){
 				String type = postArray[i].getType().name();
@@ -25,7 +33,7 @@ public class TypeStats extends Stats {
 				prep.setInt(2, typeMap.get(type));
 				prep.addBatch();
 			}
-
+			//Send the batch of all statements to the database.
 			prep.executeBatch();
 		}catch(SQLException e){
 			e.printStackTrace();

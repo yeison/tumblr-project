@@ -18,12 +18,12 @@ public class PostStatistics {
 		Post[] postArray = {};
 		postArray = postList.toArray(postArray);
 
+		System.out.println("Total posts retrieved: " + Post.totalCount);
 		System.out.println("Printing stats...");
-		new TypeStats("types", "type", postArray).createTable(false);
+		new TypeStats(postArray).createTable("types", "type");
 		System.out.println();
-		new TimeStats("hour", "hour", postArray).createTable(false);
+		new TimeStats(postArray).createTable("hour", "hour");
 		System.out.println();
-		System.out.println(Post.totalCount);
 	}
 
 }

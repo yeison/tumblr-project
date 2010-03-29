@@ -164,7 +164,8 @@ public class CommandLineInterface {
 				"provided, newsweek is used by default.", options);
 	}
 	
-	static ArrayList<Post> queryRange(int start, int num, LinkedList<String>optionValues, String subdomain){
+	static ArrayList<Post> queryRange(int start, int num, 
+						LinkedList<String>optionValues, String subdomain){
 		TumblrQuery tQuery;
 		ArrayList<Post> postList = new ArrayList<Post>(); 
 		LinkedList<String> tempOptionValues = new LinkedList<String>();
