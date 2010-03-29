@@ -6,7 +6,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 import org.apache.commons.cli.*;
 
@@ -32,15 +31,16 @@ public class CommandLineInterface {
 
 		/* The second parameter is a boolean that specifies whether the option 
 		 * requires an argument or not.*/
-		options.addOption("h", "help", false, "Print help for this application");
+		options.addOption("h", "help", false, "Prints this help message that you see.");
 		options.addOption("st", "start", true, "The post offset to start from. " +
 				"The default is 0.");
-		options.addOption("n", "num", true, "The number of posts to return. " +
-				"The default is 20, and the maximum is 50.");
-		options.addOption("t", "type", true, "The type of posts to return. If " +
-				"unspecified or empty, all types of posts are returned. Must be" +
+		options.addOption("n", "num", true, "The number of posts to query. " +
+				"The default is 20.  All may be specified, in which case all of" +
+				"the posts of a tumblr subdomain will be queried.");
+		options.addOption("t", "type", true, "The type of posts to query. If " +
+				"unspecified or empty, all types of posts are queried. Must be" +
 				" one of text, quote, photo, link, chat, video, or audio.");
-		options.addOption("i", "id", true, "A specific post ID to return. Use " +
+		options.addOption("i", "id", true, "A specific post ID to query. Use " +
 				"instead of start, num, or type.");
 		options.addOption("f", "filter", true, "Alternate filter to run on the " +
 				"text content. Allowed values:" +
@@ -48,9 +48,8 @@ public class CommandLineInterface {
 				"\n\t* none - No post-processing. Output exactly what the " +
 				"author entered. (Note: Some authors write in Markdown, which " +
 				"will not be converted to HTML when this option is used.)");
-		options.addOption("tag", "tagged", true, "Return posts with this tag " +
-				"in reverse-chronological order (newest first). Optionally " +
-				"specify chrono=1 to sort in chronological order (oldest first).");
+		options.addOption("tag", "tagged", true, "Query posts with this tag " +
+				"in reverse-chronological order (newest first).");
 		options.addOption("s", "search", true, "Search for posts with this query.");
 		options.addOption("u", "url", true, "The url of a tumblr blog. Useful " +
 				"if the blog is not a tumblr subdomain.  Cannot be used in " +
@@ -102,30 +101,42 @@ public class CommandLineInterface {
 					start = new Integer(cl.getOptionValue("start"));
 				//num is the number of posts to retrieve from tumblr.
 				int num = 0;
-				if(cl.hasOption ("n") || cl.hasOption("num"))
-					num = new Integer(cl.getOptionValue("num"));
+				if(cl.hasOption ("n") || cl.hasOption("num")){
+					if(cl.getOptionValue("num").compareToIgnoreCase("all") == 0)
+						num = -1;
+					else
+						num = new Integer(cl.getOptionValue("num"));
+				}
 				while(optionIterator.hasNext()){
 					Option option = optionIterator.next();
 					String argument = option.getValue();
 					String optString = option.getLongOpt();
-					if(argument != null && optString != "url" && 
-							num <=50 && optString != "start"){
+					if(argument != null && optString != "url" 
+						&& optString != "start"){
 						//Linked list will alternate between option and arg.
-						optionValues.add(optString);
-						optionValues.add(argument);
+						if(num > 50 & optString == "num")
+							;
+						else{
+							optionValues.add(optString);
+							optionValues.add(argument);
+						}
 					}
 				}
 				
-
+				//Join posts from different subdomains into one list.
 				String[] subdomains = {};
 				if(url == null)
 					subdomains = cl.getArgs();
 				for(int i = 0; i < subdomains.length; i++){
+					//Query a range of posts from start (default = 0) to num.
 					postList.addAll(queryRange(start, num, optionValues, subdomains[i]));
+					System.out.println("\nFinished query of subdomain: " + 
+							subdomains[i] + "\nPrinting stats...");
 				}
 				if(subdomains.length == 0){
-					if(url != null)
+					if(url != null){
 						postList = new TumblrQuery(url, optionValues).getPosts();
+					}
 					else
 						postList.addAll(queryRange(start, num, optionValues, "newsweek"));
 				}
@@ -154,6 +165,14 @@ public class CommandLineInterface {
 		TumblrQuery tQuery;
 		ArrayList<Post> postList = new ArrayList<Post>(); 
 		LinkedList<String> tempOptionValues = new LinkedList<String>();
+		//In case num is supposed to be all (all posts).
+		if(num == -1){
+			//Remove -num all from the options being passed.
+			optionValues.removeLast();
+			optionValues.removeLast();
+			tQuery = new TumblrQuery(subdomain, tempOptionValues);
+			num = new Integer(tQuery.totalPosts);
+		}
 		//Tumblr only allows a query on 50 posts at a time.  Lets change
 		//that.
 		for(int i = 0 ; i < num/50; i++){
@@ -166,11 +185,13 @@ public class CommandLineInterface {
 			tempOptionValues.addAll(optionValues);
 			tQuery = new TumblrQuery(subdomain, tempOptionValues);
 			//Join the new range with the previous range.
+			System.out.println("Retrieved query range: " + (i*50 + start) + "-" 
+					+ (i*50 + start + 50));
 			postList = tQuery.joinPosts(postList);
-			//Remove the last rangeStart used.
-			
 		}
-		if(num > 50){
+		
+		//Account for the remainder posts if num is not evenly divided by 50.
+		if(num > 50 && num%50 != 0){
 			int remainder = num%50;
 			int quotient = num/50;
 			tempOptionValues.add("num");
@@ -180,9 +201,11 @@ public class CommandLineInterface {
 			tempOptionValues.addAll(optionValues);
 			postList = 
 				new TumblrQuery(subdomain, tempOptionValues).joinPosts(postList);
+			System.out.println("Retrieved query range: " + (quotient*50) 
+					+ "-" + (quotient*50 + remainder));
 		}
 		else
-			return new TumblrQuery(subdomain, tempOptionValues).getPosts();
+			return new TumblrQuery(subdomain, optionValues).getPosts();
 		
 		return postList;
 	}

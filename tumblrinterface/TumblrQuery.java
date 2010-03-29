@@ -39,6 +39,7 @@ public class TumblrQuery {
 	private URL url;
 	private String urlString;
 	private String jsonString;
+	public String totalPosts;
 	ArrayList<Post> postList =  new ArrayList<Post>();
 	
 	/**
@@ -210,7 +211,7 @@ public class TumblrQuery {
 		//From the tumblog extract the JSON-format posts in an Iterator.
 		Iterator<JsonElement> postIterator 
 								= jObject.getAsJsonArray("posts").iterator();
-
+		totalPosts = jObject.getAsJsonPrimitive("posts-total").getAsString();
 		while(postIterator.hasNext()){
 			jElement = postIterator.next();
 			postList.add(gson.fromJson(jElement, Post.class));
