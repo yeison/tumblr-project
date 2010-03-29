@@ -215,8 +215,10 @@ public class CommandLineInterface {
 			System.out.println("Retrieved post range: " + (quotient*50) 
 					+ "-" + (quotient*50 + remainder-1));
 		}
-		else
-			return new TumblrQuery(subdomain, optionValues).getPosts();
+		else{
+			tempOptionValues = new LinkedList<String>(optionValues);
+			return new TumblrQuery(subdomain, tempOptionValues).getPosts();
+		}
 		
 		return postList;
 	}
