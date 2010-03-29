@@ -18,6 +18,7 @@ public class PostStatistics {
 		Post[] postArray = {};
 		postArray = postList.toArray(postArray);
 
+		System.out.println("Printing stats...");
 		new TypeStats("types", "type", postArray).createTable(false);
 		System.out.println();
 		new TimeStats("hour", "hour", postArray).createTable(false);

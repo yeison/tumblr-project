@@ -31,12 +31,12 @@ public class CommandLineInterface {
 
 		/* The second parameter is a boolean that specifies whether the option 
 		 * requires an argument or not.*/
-		options.addOption("h", "help", false, "Prints this help message that you see.");
+		options.addOption("h", "help", false, "Prints this usage message.");
 		options.addOption("st", "start", true, "The post offset to start from. " +
 				"The default is 0.");
 		options.addOption("n", "num", true, "The number of posts to query. " +
-				"The default is 20.  All may be specified, in which case all of" +
-				"the posts of a tumblr subdomain will be queried.");
+				"The default is 20.  \"-num all\" may be specified, in which " +
+				"case all of the posts of a tumblr subdomain will be queried.");
 		options.addOption("t", "type", true, "The type of posts to query. If " +
 				"unspecified or empty, all types of posts are queried. Must be" +
 				" one of text, quote, photo, link, chat, video, or audio.");
@@ -50,11 +50,12 @@ public class CommandLineInterface {
 				"will not be converted to HTML when this option is used.)");
 		options.addOption("tag", "tagged", true, "Query posts with this tag " +
 				"in reverse-chronological order (newest first).");
-		options.addOption("s", "search", true, "Search for posts with this query.");
+		options.addOption("s", "search", true, "Search for posts containing this" +
+				" argument.");
 		options.addOption("u", "url", true, "The url of a tumblr blog. Useful " +
 				"if the blog is not a tumblr subdomain.  Cannot be used in " +
-				"conjunction with subdomains.  Num must be less than or equal " +
-				"to 50");
+				"conjunction with subdomains.  If num is used, it must be less " +
+				"than or equal to 50, and cannot be \"all\"");
 
 
 		//Create a commandline object.  We can parse input from this object.
@@ -114,7 +115,7 @@ public class CommandLineInterface {
 					if(argument != null && optString != "url" 
 						&& optString != "start"){
 						//Linked list will alternate between option and arg.
-						if(num > 50 & optString == "num")
+						if( ( num < 0 || num > 50) & (optString == "num"))
 							;
 						else{
 							optionValues.add(optString);
@@ -129,9 +130,11 @@ public class CommandLineInterface {
 					subdomains = cl.getArgs();
 				for(int i = 0; i < subdomains.length; i++){
 					//Query a range of posts from start (default = 0) to num.
+					System.out.println("Querying " + subdomains[i] + 
+							".tumblr.com");
 					postList.addAll(queryRange(start, num, optionValues, subdomains[i]));
 					System.out.println("\nFinished query of subdomain: " + 
-							subdomains[i] + "\nPrinting stats...");
+							subdomains[i] +"\n");
 				}
 				if(subdomains.length == 0){
 					if(url != null){
@@ -155,7 +158,7 @@ public class CommandLineInterface {
 	//This method prints the usage info for the program.
 	static void printHelp(CommandLine cl, Options options){
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("tumblib [OPTION <ARGUMENT>]... [TUMBLR SUB-DOMAINS]..." +
+		formatter.printHelp("jtumblr [OPTION <ARGUMENT>]... [TUMBLR SUB-DOMAINS]..." +
 				"\nThe subdomains may be that of any existing tumblr blog " +
 				"located at http://<sub-domain>.tumblr.com.  If none are " +
 				"provided, newsweek is used by default.", options);
@@ -167,11 +170,9 @@ public class CommandLineInterface {
 		LinkedList<String> tempOptionValues = new LinkedList<String>();
 		//In case num is supposed to be all (all posts).
 		if(num == -1){
-			//Remove -num all from the options being passed.
-			optionValues.removeLast();
-			optionValues.removeLast();
 			tQuery = new TumblrQuery(subdomain, tempOptionValues);
 			num = new Integer(tQuery.totalPosts);
+			Post.resetCount();
 		}
 		//Tumblr only allows a query on 50 posts at a time.  Lets change
 		//that.
@@ -185,8 +186,8 @@ public class CommandLineInterface {
 			tempOptionValues.addAll(optionValues);
 			tQuery = new TumblrQuery(subdomain, tempOptionValues);
 			//Join the new range with the previous range.
-			System.out.println("Retrieved query range: " + (i*50 + start) + "-" 
-					+ (i*50 + start + 50));
+			System.out.println("Retrieved post range: " + (i*50 + start) + "-" 
+					+ (i*50-1 + start + 50));
 			postList = tQuery.joinPosts(postList);
 		}
 		
@@ -201,8 +202,8 @@ public class CommandLineInterface {
 			tempOptionValues.addAll(optionValues);
 			postList = 
 				new TumblrQuery(subdomain, tempOptionValues).joinPosts(postList);
-			System.out.println("Retrieved query range: " + (quotient*50) 
-					+ "-" + (quotient*50 + remainder));
+			System.out.println("Retrieved post range: " + (quotient*50) 
+					+ "-" + (quotient*50 + remainder-1));
 		}
 		else
 			return new TumblrQuery(subdomain, optionValues).getPosts();

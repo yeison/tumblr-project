@@ -1,0 +1,71 @@
+JTumblr version 0.42
+
+============
+REQUIREMENTS
+============
+-Ant version 1.7
+-J2SE version 5.0+
+-SQLite3
+
+============
+INSTRUCTIONS
+============
+Building
+  Extract the contents of jtumblr.zip.  From a command line, navigate 
+  to the folder "jtumblr".  Once there, type the command: 
+
+	ant
+
+  Ant should read the appropriate build.xml, and compile the source 
+  code.  In addition, a runnable jar file will be created.
+
+Running
+  The newly created jar file should be run from the command line. To
+  do so, use the -jar option with java:
+
+	java -jar jtumblr.jar
+	
+  This will print a help message for the jtumblr application.  In
+  order to query tumblr for particular posts, use one or more of the
+  options defined in the help message.  For example:
+  
+  	java -jar jtumblr.jar -num all newsweek artinmycoffee
+  	
+  Will query all the posts from newsweek.tumblr.com and 
+  artinmycoffee.tumblr.com, and return summary statistics on those 
+  posts.
+  
+========
+FEATURES
+========
+ *Use all of the GET parameters, except for "state" (requires 
+  authentication), defined by the tumblr api: 
+  http://www.tumblr.com/docs/en/api to retrieve posts of interest.
+ *Query multiple tumblr blogs if they exist as a subdomain of 
+  tumblr.com.
+ *Retrieve any number of posts from a blog, as long as they exist.  
+  Specify "all" to retrieve all of that blog's posts.
+ *Provides three types of summary statistics:
+ 	-Number of posts made during each hour of the day.
+ 	-Number of posts for each post-type.
+ 	-Number of posts for each tag that occurs.
+   
+==========
+KNOWN BUGS
+==========
+  *Only one url may be provided with the -url option.  In addition,
+   when using -url num cannot be all, and must be less than or equal
+   to 50.
+  *Tumblr may deny further requests for a period if too many
+   requests are made.  An http 500 or 503 error is returned
+   by the program when this occurs.
+  *There is an "anwer" post-type that is not handled by the
+   program.  A generic Post class is created when one of these
+   post-types is encountered.
+  *For PhotoPosts containing more than one photo, only the primary 
+   photo-url is handled correctly.
+  *If one of the dimensions of a photo resolution is greater than
+   1280, that larger photo size is discarded.  Instead, the
+   TumblrPhoto class will only store the link to the smaller version
+   of the photo (dimensions less than or equal to 1280).
+  *
